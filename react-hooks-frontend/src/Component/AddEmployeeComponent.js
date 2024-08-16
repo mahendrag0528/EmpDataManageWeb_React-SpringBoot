@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import EmployeeService from "./EmployeeService";
-import { Link, useNavigate, useParams } from 'react-router-dom';
+//import { Link } from 'react-router-dom';
 
-const AddEmployeeComponent = ()=>{
+const AddEmployeeComponent = ({id,isOpened,modelclose})=>{
     const [firstName,setFirstName]=useState("");
     const [lastName,setLastName]=useState("");
     const [emailId,setEmailId]=useState("");
-    const {id}=useParams();
-  const navigate=useNavigate();
+
     const saveEmployee=(e)=>{
         e.preventDefault();
         const employee={firstName,lastName,emailId};
-        if(id){
+        if(id!==0){
             EmployeeService.updateEmployee(id,employee).then((response)=>{
-                navigate(`/`);
+                modelclose(false);
+                isOpened();
             }
         ).catch((err)=>{
             console.log(err);
@@ -21,7 +21,8 @@ const AddEmployeeComponent = ()=>{
         }
         else{
         EmployeeService.saveEmployee(employee).then((response)=>{
-            navigate(`/`);
+            modelclose(false);
+            isOpened();
         }
     ).catch((err)=>{
         console.log(err);
@@ -30,7 +31,7 @@ const AddEmployeeComponent = ()=>{
     }
 
     useEffect(()=>{
-
+        if(id!==0){
         EmployeeService.getEmployeeById(id).then(
             (response)=>{
                 setFirstName(response.data.firstName);
@@ -39,7 +40,13 @@ const AddEmployeeComponent = ()=>{
             }).catch((err)=>{
                 console.log(err);
             });
-    },[]);
+    }},[]);
+
+    const closeModal= ()=>{
+       // window.alert("cancel is clicked!");
+        modelclose(false);
+        isOpened();
+    }
 
     const title= ()=>{
         if(id){
@@ -49,15 +56,14 @@ const AddEmployeeComponent = ()=>{
             return <h2 className="text-center">Add Employee</h2>;
         }
     }
-    return (
-        <div>
+    return (<div>
             <div className="container">
                 <div className="row">
-                    <div className="card col-md-6 offset-md-3 offset-md-3">
+                    <div className="card">
                         {title()}
                         <div className="card-body">
                             <form>
-                                <div className="form-group mb-2">
+                                <div className="form-group">
                                     <label className="form-label">First Name:</label>
                                     <input
                                     type="text"
@@ -68,7 +74,7 @@ const AddEmployeeComponent = ()=>{
                                     onChange={(e)=>setFirstName(e.target.value)}
                                     ></input>
                                 </div>
-                                <div className="form-group mb-2">
+                                <div className="form-group ">
                                     <label className="form-label">Last Name:</label>
                                     <input
                                     type="text"
@@ -79,7 +85,7 @@ const AddEmployeeComponent = ()=>{
                                     onChange={(e)=>setLastName(e.target.value)}
                                     ></input>
                                 </div>
-                                <div className="form-group mb-2">
+                                <div className="form-group">
                                     <label className="form-label">Email Id:</label>
                                     <input
                                     type="text"
@@ -92,12 +98,13 @@ const AddEmployeeComponent = ()=>{
                                 </div>
 
                                 <button type="button" className="btn btn-success" onClick={(e)=>saveEmployee(e)}>Submit</button>
-                                <Link to={`/`} className="btn btn-danger">Cancel</Link>
+                                <button onClick={closeModal} className="btn btn-danger">Cancel</button>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
+      
         </div>
     );
 }
